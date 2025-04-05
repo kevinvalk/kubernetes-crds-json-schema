@@ -1,0 +1,13 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/acid.zalan.do.v1.OperatorConfiguration"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acid.zalan.do.v1.postgresql"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acid.zalan.do.v1.PostgresTeam"
+    }
+  ]
+}

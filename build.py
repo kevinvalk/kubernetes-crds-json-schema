@@ -301,6 +301,16 @@ repositories = [
         lambda ref: f"https://github.com/cert-manager/cert-manager/releases/download/{ref.lstrip('ref/tags/')}/cert-manager.crds.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
+    CrdsRepository(
+        "postgres-operator",
+        "https://github.com/zalando/postgres-operator",
+        lambda ref: (
+            f"https://raw.githubusercontent.com/zalando/postgres-operator/{ref}/charts/postgres-operator/crds/operatorconfigurations.yaml",
+            f"https://raw.githubusercontent.com/zalando/postgres-operator/{ref}/charts/postgres-operator/crds/postgresqls.yaml",
+            f"https://raw.githubusercontent.com/zalando/postgres-operator/{ref}/charts/postgres-operator/crds/postgresteams.yaml",
+        ),
+        exclude_tag_regex=r"v1\.[0-5]\.[0-9]{1,}$",
+    ),
 ]
 
 
