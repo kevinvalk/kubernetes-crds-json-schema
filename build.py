@@ -1,19 +1,3 @@
-# Let's do some VIBE coding! I want to have an elegant Python 3.12+ script that has definitions that contain:
-# - repository URL (to a Git repository)
-# - main branch name
-# - regex to match against tags (probably semver)
-# - regex to exclude tags
-# - a function or URL to "retrieve" one or multiple files from the repository. This might simple be an URL with placeholders, or can be a function that maybe does a git clone, copies some files etc.
-
-# For all these definitions go through them in such a way that we can call the function/URL for each tag that matches the regex (and excluding the exclude regex) for each defined repository.
-
-# Some important notes:
-# - Use Python types always
-# - The definitions should be easy to add and will be many
-# - The to be called code I will write myself.
-
-# Can you generate this in beaitful elegent nice Python 3.12+ code?
-#
 import contextlib
 from typing import Any, cast, Callable, Sequence, Iterator
 from pygit2.repository import Repository
