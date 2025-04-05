@@ -1,0 +1,115 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.BackingImageDataSource"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.BackingImageDataSource"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.BackingImageManager"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.BackingImageManager"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.BackingImage"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.BackingImage"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.BackupBackingImage"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.Backup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Backup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.BackupTarget"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.BackupTarget"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.BackupVolume"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.BackupVolume"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.EngineImage"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.EngineImage"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.Engine"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Engine"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.InstanceManager"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.InstanceManager"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.Node"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Node"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Orphan"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.RecurringJob"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.RecurringJob"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.Replica"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Replica"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.Setting"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Setting"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.ShareManager"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.ShareManager"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Snapshot"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.SupportBundle"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.SystemBackup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.SystemRestore"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.VolumeAttachment"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta1.Volume"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/longhorn.io.v1beta2.Volume"
+    }
+  ]
+}

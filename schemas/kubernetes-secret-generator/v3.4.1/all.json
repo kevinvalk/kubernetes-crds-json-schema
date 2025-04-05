@@ -1,0 +1,13 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/secretgenerator.mittwald.de.v1alpha1.BasicAuth"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/secretgenerator.mittwald.de.v1alpha1.SSHKeyPair"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/secretgenerator.mittwald.de.v1alpha1.StringSecret"
+    }
+  ]
+}

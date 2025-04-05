@@ -1,0 +1,31 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.Backup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.Connection"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.Database"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.Grant"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.MariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.MaxScale"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.Restore"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.SqlJob"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/mariadb.mmontes.io.v1alpha1.User"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.BackupMariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.DatabaseMariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.ExporterMariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.GrantMariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.MariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.MonitorMariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.RestoreMariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/database.mmontes.io.v1alpha1.UserMariaDB"
+    }
+  ]
+}

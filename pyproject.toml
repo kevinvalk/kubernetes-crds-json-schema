@@ -1,0 +1,22 @@
+[project]
+name = "crds-json-schema"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "pyaml>=25.1.0",
+    "pygit2>=1.17.0",
+]
+
+[dependency-groups]
+dev = [
+    "poethepoet>=0.32.2",
+    "pytest>=8.3.4",
+    "ruff>=0.11.0",
+]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
