@@ -295,6 +295,12 @@ repositories = [
         lambda ref: f"https://github.com/longhorn/longhorn/releases/download/{ref.lstrip('ref/tags/')}/longhorn.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
+    CrdsRepository(
+        "cert-manager",
+        "https://github.com/cert-manager/cert-manager.git",
+        lambda ref: f"https://github.com/cert-manager/cert-manager/releases/download/{ref.lstrip('ref/tags/')}/cert-manager.crds.yaml",
+        exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
+    ),
 ]
 
 

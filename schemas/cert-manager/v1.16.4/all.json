@@ -1,0 +1,22 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.CertificateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.Certificate"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1.Challenge"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.ClusterIssuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.Issuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1.Order"
+    }
+  ]
+}

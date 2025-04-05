@@ -1,0 +1,76 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha2.CertificateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha3.CertificateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1beta1.CertificateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.CertificateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha2.Certificate"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha3.Certificate"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1beta1.Certificate"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.Certificate"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1alpha2.Challenge"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1alpha3.Challenge"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1beta1.Challenge"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1.Challenge"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha2.ClusterIssuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha3.ClusterIssuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1beta1.ClusterIssuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.ClusterIssuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha2.Issuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1alpha3.Issuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1beta1.Issuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cert-manager.io.v1.Issuer"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1alpha2.Order"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1alpha3.Order"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1beta1.Order"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/acme.cert-manager.io.v1.Order"
+    }
+  ]
+}
