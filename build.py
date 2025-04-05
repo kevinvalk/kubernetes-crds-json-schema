@@ -196,6 +196,13 @@ def generate(*streams: io.IOBase, output_path: Path | None = None, filename_form
                 schema.definition["properties"]["apiVersion"], "enum", f"{schema.group}/{schema.version}"
             )
             append_no_duplicates(schema.definition["properties"]["kind"], "enum", schema.kind)
+
+            # Sometimes it happens that metadata field is not "allowed" in a schema which obviously is a mistake!
+            # TODO: Can we really not reference the "internal" type io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta? Specifically,
+            # we need to not specify the scheme here as then we are locking this to a version...
+            if "metadata" not in schema.definition["properties"]:
+                schema.definition["properties"]["metadata"] = {"type": "object"}
+
             definitions[f"{schema.group}.{schema.version}.{schema.kind}"] = schema.definition
 
         definitions_file.write(json.dumps({"definitions": definitions}, indent=2))

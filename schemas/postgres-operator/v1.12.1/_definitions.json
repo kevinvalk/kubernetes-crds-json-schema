@@ -925,6 +925,9 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "metadata": {
+          "type": "object"
         }
       }
     },
@@ -1834,6 +1837,9 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "metadata": {
+          "type": "object"
         }
       }
     },
@@ -1898,6 +1904,9 @@
             }
           },
           "additionalProperties": false
+        },
+        "metadata": {
+          "type": "object"
         }
       }
     }
