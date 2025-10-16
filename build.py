@@ -8,8 +8,10 @@ import asyncio
 import yaml
 import io
 from pathlib import Path
+from httpx_retries import RetryTransport
 import json
 from dataclasses import dataclass
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,9 +27,9 @@ class IterStream(io.RawIOBase):
 
     def readinto(self, b):
         try:
-            l = len(b)  # We're supposed to return at most this much
+            length = len(b)  # We're supposed to return at most this much
             chunk = self.leftover or next(self.iterator)
-            output, self.leftover = chunk[:l], chunk[l:]
+            output, self.leftover = chunk[:length], chunk[length:]
             b[: len(output)] = output
             return len(output)
         except StopIteration:
@@ -223,20 +225,16 @@ class CrdsRepository:
 
         self.git = Repository()
 
-    def get_refs(self):
+    async def get_refs(self):
         remote = self.git.remotes.create_anonymous(self.url)
 
         return {
-            remote["name"]: remote
-            for remote in cast(
-                list[dict[str, Any]],
-                remote.ls_remotes(),
-            )
-            if remote["name"].startswith("refs/tags/")
-            and self.tag_regex.match(remote["name"].lstrip("refs/tags/"))
-            and (
-                self.tag_exclude_regex is None or not self.tag_exclude_regex.match(remote["name"].lstrip("refs/tags/"))
-            )
+            remote.name.lstrip("refs/tags/"): remote
+            for remote in remote.list_heads()
+            if remote.name is not None
+            and remote.name.startswith("refs/tags/")
+            and self.tag_regex.match(remote.name.lstrip("refs/tags/"))
+            and (self.tag_exclude_regex is None or not self.tag_exclude_regex.match(remote.name.lstrip("refs/tags/")))
         }
 
     @contextlib.asynccontextmanager
@@ -246,7 +244,7 @@ class CrdsRepository:
                 "You need to either extend the CrdsRepository class and implement get_crds or pass a crd_url"
             )
 
-        async with httpx.AsyncClient(follow_redirects=True) as client:
+        async with httpx.AsyncClient(follow_redirects=True, transport=RetryTransport()) as client:
             urls = self.get_crd_url(ref)
             if isinstance(urls, str):
                 urls = [urls]
@@ -263,8 +261,43 @@ class CrdsRepository:
             generate(*files, **kwargs)
 
 
-# Example usage:
+class HelmCrdsRepository(CrdsRepository):
+    def __init__(self, repository_url: str, *args, **kwargs) -> None:
+        self.repository_url = repository_url
+        super().__init__(*args, **kwargs)
+
+    async def get_refs(self):
+        remotes = await super().get_refs()
+
+        async with httpx.AsyncClient(follow_redirects=True, transport=RetryTransport()) as client:
+            r = await client.get(self.repository_url)
+            r.raise_for_status()
+            index = yaml.safe_load(r.text)
+
+            helm_versions = [
+                f"v{entry['version'].lstrip('v')}"
+                for entry in cast(list[dict[Any, Any]], index.get("entries", []).get(self.name, []))
+                if "version" in entry
+            ]
+
+            return {version: remote for version, remote in remotes.items() if version in helm_versions}
+
+
 repositories = [
+    HelmCrdsRepository(
+        "https://pkgs.tailscale.com/helmcharts/index.yaml",
+        "tailscale",
+        "tailscale-operator",
+        "https://github.com/tailscale/tailscale.git",
+        lambda ref: (
+            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_connectors.yaml",
+            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_dnsconfigs.yaml",
+            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml",
+            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_proxygroups.yaml",
+            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_recorders.yaml",
+        ),
+        exclude_tag_regex=r"v1\.([0-6][0-9]|7[0-4])\.[0-9]{1,}$",
+    ),
     CrdsRepository(
         "mariadb-operator",
         "mariadb-operator",
@@ -315,11 +348,11 @@ repositories = [
 async def pull():
     async with asyncio.TaskGroup() as tg:
         for repository in repositories:
-            for ref in repository.get_refs().keys():
-                path = Path("schemas") / repository.owner / repository.name / ref.lstrip("refs/tags/")
+            for version in (await repository.get_refs()).keys():
+                path = Path("schemas") / repository.owner / repository.name / version
                 if not path.exists():
-                    logger.info(f"Retrieving {repository.owner}/{repository.name} {ref}")
-                    tg.create_task(repository.generate_json_schema(ref, output_path=path))
+                    logger.info(f"Retrieving {repository.owner}/{repository.name} {version}")
+                    tg.create_task(repository.generate_json_schema(version, output_path=path))
 
 
 if __name__ == "__main__":
