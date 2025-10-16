@@ -1,0 +1,29 @@
+name: Update schemas
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: 0 0 * * *
+
+concurrency: update
+
+permissions:
+  contents: write # needed to push commits back to the repo
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Run build.py
+        run: uv run build.py
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update schemas"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: github-actions <github-actions[bot]@users.noreply.github.com>
