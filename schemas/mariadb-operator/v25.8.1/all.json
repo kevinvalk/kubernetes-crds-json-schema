@@ -1,0 +1,34 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.Backup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.Connection"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.Database"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.Grant"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.MariaDB"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.MaxScale"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.PhysicalBackup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.Restore"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.SqlJob"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/k8s.mariadb.com.v1alpha1.User"
+    }
+  ]
+}
