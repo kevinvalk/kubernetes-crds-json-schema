@@ -1,5 +1,6 @@
-import contextlib
-from typing import Any, cast, Callable, Sequence, Iterator
+import tempfile
+from typing import Any, cast, Callable, Sequence, Iterator, Generator
+import pygit2
 from pygit2.repository import Repository
 import logging
 import re
@@ -7,13 +8,14 @@ import httpx
 import asyncio
 import yaml
 import io
-from pathlib import Path
+from pathlib import Path, PurePath
 from httpx_retries import RetryTransport
 import json
 from dataclasses import dataclass
 
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("httpx").setLevel(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 
@@ -116,7 +118,9 @@ def append_no_duplicates(obj, key, value):
         obj[key].append(value)
 
 
-def generate(*streams: io.IOBase, output_path: Path | None = None, filename_format: str = "{kind}-{group}-{version}"):
+def generate(
+    streams: Generator[io.IOBase], output_path: Path | None = None, filename_format: str = "{kind}-{group}-{version}"
+):
     schemas: list[Schema] = []
     if output_path is None:
         output_path = Path.cwd()
@@ -169,7 +173,7 @@ def generate(*streams: io.IOBase, output_path: Path | None = None, filename_form
         # Dealing with user input here..
         with filename.open("w") as file:
             file.write(json.dumps(schema, indent=2))
-            print("{filename}".format(filename=filename))
+            logger.debug(f"Generating file {filename}")
 
     # Make a single definitions file that has the enum field set for kind and apiVersion so we can have automatic matching
     # for JSON schema.
@@ -193,7 +197,7 @@ def generate(*streams: io.IOBase, output_path: Path | None = None, filename_form
 
         definitions_file.write(json.dumps({"definitions": definitions}, indent=2))
 
-    # Finally we write a flux2 main schema file that can be used to automatically validate any Flux2 schema using oneOf
+    # Finally we write the main schema file that can be used to automatically validate any Flux2 schema using oneOf
     # semantics.
     with (output_path / "all.json").open("w") as all_file:
         refs = [
@@ -203,33 +207,34 @@ def generate(*streams: io.IOBase, output_path: Path | None = None, filename_form
         all_file.write(json.dumps({"oneOf": refs}, indent=2))
 
 
-class CrdsRepository:
+class CrdRepository:
     def __init__(
         self,
         owner: str,
         name: str,
-        url: str,
-        get_crd_url: Callable[[str], str | Sequence[str]] | None = None,
+        git_url: str,
+        crd_globs: str | list[str] | None,
         *,
-        main_branch: str = "main",
+        get_crd_urls: Callable[[str], str | Sequence[str]] | None = None,
         tag_regex: str = r"^v[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$",
         exclude_tag_regex: str | None = None,
     ) -> None:
         self.owner = owner
         self.name = name
-        self.url = url
-        self.get_crd_url = get_crd_url
-        self.main_branch = main_branch
+        self.git_url = git_url
+
+        self.get_crd_urls = get_crd_urls
+        self.crd_globs = [crd_globs] if isinstance(crd_globs, str) else crd_globs
         self.tag_regex = re.compile(tag_regex)
         self.tag_exclude_regex = re.compile(exclude_tag_regex) if exclude_tag_regex else None
 
         self.git = Repository()
 
-    async def get_refs(self):
-        remote = self.git.remotes.create_anonymous(self.url)
+    async def get_refs(self) -> dict[str, str]:
+        remote = self.git.remotes.create_anonymous(self.git_url)
 
         return {
-            remote.name.lstrip("refs/tags/"): remote
+            remote.name.lstrip("refs/tags/"): remote.name
             for remote in remote.list_heads()
             if remote.name is not None
             and remote.name.startswith("refs/tags/")
@@ -237,31 +242,73 @@ class CrdsRepository:
             and (self.tag_exclude_regex is None or not self.tag_exclude_regex.match(remote.name.lstrip("refs/tags/")))
         }
 
-    @contextlib.asynccontextmanager
-    async def get_crds(self, ref: str, buffer_size=io.DEFAULT_BUFFER_SIZE):
-        if self.get_crd_url is None:
-            raise NotImplementedError(
-                "You need to either extend the CrdsRepository class and implement get_crds or pass a crd_url"
-            )
+    def git_files(self, ref):
+        @dataclass
+        class File:
+            path: PurePath
+            blob: pygit2.Blob
 
+        def encode_tree(tree: pygit2.Tree, root: PurePath = PurePath(), *, accumulator: list[File] = []) -> list[File]:
+            for obj in tree:
+                assert obj.name is not None, "We assume git objects in a tree always have a name."
+                if isinstance(obj, pygit2.Tree):
+                    encode_tree(obj, root / obj.name)
+                elif isinstance(obj, pygit2.Blob):
+                    accumulator.append(File(root / obj.name, obj))
+                else:
+                    logger.debug(f"Ignoring git object at {root / obj.name}")
+
+            return accumulator
+
+        with tempfile.TemporaryDirectory() as path:
+            git = pygit2.init_repository(path, bare=True)
+            remote = git.remotes.create("origin", self.git_url)
+            transfer = remote.fetch([ref], depth=1)
+
+            assert transfer.total_objects != 0
+
+            obj = git.revparse_single(ref)
+            commit = obj.peel(pygit2.Commit)
+
+            return encode_tree(commit.tree)
+
+    async def generate_json_schema_from_urls(self, ref: str, buffer_size=io.DEFAULT_BUFFER_SIZE, **kwargs) -> None:
+        assert self.get_crd_urls is not None
         async with httpx.AsyncClient(follow_redirects=True, transport=RetryTransport()) as client:
-            urls = self.get_crd_url(ref)
+            urls = self.get_crd_urls(ref)
             if isinstance(urls, str):
                 urls = [urls]
 
             responses = await asyncio.gather(*[client.get(url) for url in urls])
 
-            yield [
-                io.BufferedReader(IterStream(response.iter_bytes(buffer_size)), buffer_size=buffer_size)
-                for response in responses
-            ]
+            if len(responses) <= 0:
+                logger.warning(f"No CRDs found for {self.owner}/{self.name} ref {ref} from url {','.join(urls)}")
+                return
 
-    async def generate_json_schema(self, ref: str, **kwargs):
-        async with self.get_crds(ref) as files:
-            generate(*files, **kwargs)
+            def get_url_crd_streams():
+                for response in responses:
+                    yield io.BufferedReader(IterStream(response.iter_bytes(buffer_size)), buffer_size=buffer_size)
+
+            generate(get_url_crd_streams(), **kwargs)
+
+    def generate_json_schema_from_globs(self, ref: str, **kwargs) -> None:
+        assert self.crd_globs is not None
+        files = self.git_files(ref)
+        blobs = [file.blob for file in files if any(file.path.full_match(glob) for glob in self.crd_globs)]
+
+        if len(blobs) <= 0:
+            logger.warning(f"No CRDs found for {self.owner}/{self.name} ref {ref} via glob {','.join(self.crd_globs)}")
+            return
+
+        def get_crd_streams():
+            for blob in blobs:
+                with pygit2.BlobIO(blob) as file:
+                    yield file
+
+        generate(get_crd_streams(), **kwargs)
 
 
-class HelmCrdsRepository(CrdsRepository):
+class HelmCrdRepository(CrdRepository):
     def __init__(self, repository_url: str, *args, **kwargs) -> None:
         self.repository_url = repository_url
         super().__init__(*args, **kwargs)
@@ -283,64 +330,59 @@ class HelmCrdsRepository(CrdsRepository):
             return {version: remote for version, remote in remotes.items() if version in helm_versions}
 
 
-repositories = [
-    HelmCrdsRepository(
+repositories: list[CrdRepository] = [
+    HelmCrdRepository(
         "https://pkgs.tailscale.com/helmcharts/index.yaml",
         "tailscale",
         "tailscale-operator",
         "https://github.com/tailscale/tailscale.git",
-        lambda ref: (
-            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_connectors.yaml",
-            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_dnsconfigs.yaml",
-            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml",
-            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_proxygroups.yaml",
-            f"https://raw.githubusercontent.com/tailscale/tailscale/{ref}/cmd/k8s-operator/deploy/crds/tailscale.com_recorders.yaml",
-        ),
-        exclude_tag_regex=r"v1\.([0-6][0-9]|7[0-4])\.[0-9]{1,}$",
+        "cmd/k8s-operator/deploy/crds/*.y*ml",
+        exclude_tag_regex=r"v1.56.[0-1]$",  # These initial versions did not had CRDs
     ),
-    CrdsRepository(
+    CrdRepository(
         "mariadb-operator",
         "mariadb-operator",
         "https://github.com/mariadb-operator/mariadb-operator.git",
-        lambda ref: f"https://raw.githubusercontent.com/mariadb-operator/mariadb-operator/{ref}/deploy/crds/crds.yaml",
-        exclude_tag_regex=r"v0\.0\.[0-4]$",
+        "deploy/crds/*.y*ml",
+        exclude_tag_regex=r"v0\.0\.[0-4]$",  # Old versions
     ),
-    CrdsRepository(
+    CrdRepository(
         "mittwald",
         "kubernetes-secret-generator",
         "https://github.com/mittwald/kubernetes-secret-generator.git",
-        lambda ref: (
-            f"https://raw.githubusercontent.com/mittwald/kubernetes-secret-generator/{ref}/deploy/crds/secretgenerator.mittwald.de_basicauths_crd.yaml",
-            f"https://raw.githubusercontent.com/mittwald/kubernetes-secret-generator/{ref}/deploy/crds/secretgenerator.mittwald.de_sshkeypairs_crd.yaml",
-            f"https://raw.githubusercontent.com/mittwald/kubernetes-secret-generator/{ref}/deploy/crds/secretgenerator.mittwald.de_stringsecrets_crd.yaml",
-        ),
+        "deploy/crds/*.y*ml",
         # Before 3.3.3 (until 3.3.2) there was no CRD support so lets only start from v3.4 (to make the regex easier...)
         exclude_tag_regex=r"(v[0-2]\..*?\..*?|v3\.[0-3]\.[0-9]+?)$",
     ),
-    CrdsRepository(
+    CrdRepository(
+        "zalando",
+        "postgres-operator",
+        "https://github.com/zalando/postgres-operator.git",
+        "manifests/*.crd.y*ml",
+        exclude_tag_regex=r"v1\.[0-2]\.0$",  # These initial versions had CRDs only within templates
+    ),
+    CrdRepository(
         "longhorn",
         "longhorn",
         "https://github.com/longhorn/longhorn.git",
-        lambda ref: f"https://github.com/longhorn/longhorn/releases/download/{ref.lstrip('ref/tags/')}/longhorn.yaml",
+        None,
+        get_crd_urls=lambda ref: f"https://github.com/longhorn/longhorn/releases/download/{ref.lstrip('ref/tags/')}/longhorn.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
-    CrdsRepository(
+    CrdRepository(
         "cert-manager",
         "cert-manager",
         "https://github.com/cert-manager/cert-manager.git",
-        lambda ref: f"https://github.com/cert-manager/cert-manager/releases/download/{ref.lstrip('ref/tags/')}/cert-manager.crds.yaml",
+        None,
+        get_crd_urls=lambda ref: f"https://github.com/cert-manager/cert-manager/releases/download/{ref.lstrip('ref/tags/')}/cert-manager.crds.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
-    CrdsRepository(
-        "zalando",
-        "postgres-operator",
-        "https://github.com/zalando/postgres-operator",
-        lambda ref: (
-            f"https://raw.githubusercontent.com/zalando/postgres-operator/{ref}/charts/postgres-operator/crds/operatorconfigurations.yaml",
-            f"https://raw.githubusercontent.com/zalando/postgres-operator/{ref}/charts/postgres-operator/crds/postgresqls.yaml",
-            f"https://raw.githubusercontent.com/zalando/postgres-operator/{ref}/charts/postgres-operator/crds/postgresteams.yaml",
-        ),
-        exclude_tag_regex=r"v1\.[0-5]\.[0-9]{1,}$",
+    CrdRepository(
+        "kyverno",
+        "kyverno",
+        "https://github.com/kyverno/kyverno.git",
+        "config/crds/**/*.y*ml",
+        exclude_tag_regex=r"(v0\.|v1\.[0-5]\.)",  # Ignore old versions that did not had config files in the above glob.
     ),
 ]
 
@@ -348,11 +390,19 @@ repositories = [
 async def pull():
     async with asyncio.TaskGroup() as tg:
         for repository in repositories:
-            for version in (await repository.get_refs()).keys():
+            for version, ref in (await repository.get_refs()).items():
                 path = Path("schemas") / repository.owner / repository.name / version
                 if not path.exists():
-                    logger.info(f"Retrieving {repository.owner}/{repository.name} {version}")
-                    tg.create_task(repository.generate_json_schema(version, output_path=path))
+                    logger.info(f"Retrieving {repository.owner}/{repository.name} {version} via {ref}")
+
+                    if repository.crd_globs is not None:
+                        tg.create_task(
+                            asyncio.to_thread(repository.generate_json_schema_from_globs, ref, output_path=path)
+                        )
+                    elif repository.get_crd_urls is not None:
+                        tg.create_task(repository.generate_json_schema_from_urls(ref, output_path=path))
+                    else:
+                        raise RuntimeError("Either crd_globs OR get_crd_urls has to be provided")
 
 
 if __name__ == "__main__":
