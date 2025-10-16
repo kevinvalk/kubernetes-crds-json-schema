@@ -204,6 +204,7 @@ def generate(*streams: io.IOBase, output_path: Path | None = None, filename_form
 class CrdsRepository:
     def __init__(
         self,
+        owner: str,
         name: str,
         url: str,
         get_crd_url: Callable[[str], str | Sequence[str]] | None = None,
@@ -212,6 +213,7 @@ class CrdsRepository:
         tag_regex: str = r"^v[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$",
         exclude_tag_regex: str | None = None,
     ) -> None:
+        self.owner = owner
         self.name = name
         self.url = url
         self.get_crd_url = get_crd_url
@@ -265,11 +267,13 @@ class CrdsRepository:
 repositories = [
     CrdsRepository(
         "mariadb-operator",
+        "mariadb-operator",
         "https://github.com/mariadb-operator/mariadb-operator.git",
         lambda ref: f"https://raw.githubusercontent.com/mariadb-operator/mariadb-operator/{ref}/deploy/crds/crds.yaml",
         exclude_tag_regex=r"v0\.0\.[0-4]$",
     ),
     CrdsRepository(
+        "mittwald",
         "kubernetes-secret-generator",
         "https://github.com/mittwald/kubernetes-secret-generator.git",
         lambda ref: (
@@ -282,17 +286,20 @@ repositories = [
     ),
     CrdsRepository(
         "longhorn",
+        "longhorn",
         "https://github.com/longhorn/longhorn.git",
         lambda ref: f"https://github.com/longhorn/longhorn/releases/download/{ref.lstrip('ref/tags/')}/longhorn.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
     CrdsRepository(
         "cert-manager",
+        "cert-manager",
         "https://github.com/cert-manager/cert-manager.git",
         lambda ref: f"https://github.com/cert-manager/cert-manager/releases/download/{ref.lstrip('ref/tags/')}/cert-manager.crds.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
     CrdsRepository(
+        "zalando",
         "postgres-operator",
         "https://github.com/zalando/postgres-operator",
         lambda ref: (
@@ -309,9 +316,9 @@ async def pull():
     async with asyncio.TaskGroup() as tg:
         for repository in repositories:
             for ref in repository.get_refs().keys():
-                path = Path("schemas") / repository.name / ref.lstrip("refs/tags/")
+                path = Path("schemas") / repository.owner / repository.name / ref.lstrip("refs/tags/")
                 if not path.exists():
-                    logger.info(f"Retrieving {repository.name} {ref}")
+                    logger.info(f"Retrieving {repository.owner}/{repository.name} {ref}")
                     tg.create_task(repository.generate_json_schema(ref, output_path=path))
 
 
