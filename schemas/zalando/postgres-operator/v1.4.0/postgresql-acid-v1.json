@@ -383,12 +383,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "status": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
     }
   }
 }

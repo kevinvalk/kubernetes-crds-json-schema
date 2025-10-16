@@ -213,7 +213,7 @@ class CrdRepository:
         owner: str,
         name: str,
         git_url: str,
-        crd_globs: str | list[str] | None,
+        crd_globs: str | Sequence[str] | None,
         *,
         get_crd_urls: Callable[[str], str | Sequence[str]] | None = None,
         tag_regex: str = r"^v[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$",
@@ -309,8 +309,9 @@ class CrdRepository:
 
 
 class HelmCrdRepository(CrdRepository):
-    def __init__(self, repository_url: str, *args, **kwargs) -> None:
+    def __init__(self, repository_url: str, *args, use_app_version_for_git_tag=False, **kwargs) -> None:
         self.repository_url = repository_url
+        self.use_app_version_for_git_tag = use_app_version_for_git_tag
         super().__init__(*args, **kwargs)
 
     async def get_refs(self):
@@ -321,13 +322,24 @@ class HelmCrdRepository(CrdRepository):
             r.raise_for_status()
             index = yaml.safe_load(r.text)
 
-            helm_versions = [
-                f"v{entry['version'].lstrip('v')}"
+            helm_versions = {
+                f"v{entry['appVersion' if self.use_app_version_for_git_tag else 'version'].lstrip('v')}": entry
                 for entry in cast(list[dict[Any, Any]], index.get("entries", []).get(self.name, []))
                 if "version" in entry
-            ]
+            }
 
-            return {version: remote for version, remote in remotes.items() if version in helm_versions}
+            verion_refs = {
+                f"v{helm_versions[version]['version'].lstrip('v')}": remote
+                for version, remote in remotes.items()
+                if version in helm_versions
+            }
+
+            if len(verion_refs) <= 0:
+                logger.warning(
+                    f"The Helm versions for {self.name} do no match git tags, you probably need to set use_app_version_for_git_tag."
+                )
+
+            return verion_refs
 
 
 repositories: list[CrdRepository] = [
@@ -336,21 +348,21 @@ repositories: list[CrdRepository] = [
         "tailscale",
         "tailscale-operator",
         "https://github.com/tailscale/tailscale.git",
-        "cmd/k8s-operator/deploy/crds/*.y*ml",
+        ("cmd/k8s-operator/deploy/crds/*.yaml", "cmd/k8s-operator/deploy/crds/*.yml"),
         exclude_tag_regex=r"v1.56.[0-1]$",  # These initial versions did not had CRDs
     ),
     CrdRepository(
         "mariadb-operator",
         "mariadb-operator",
         "https://github.com/mariadb-operator/mariadb-operator.git",
-        "deploy/crds/*.y*ml",
+        ("deploy/crds/*.yaml", "deploy/crds/*.yml"),
         exclude_tag_regex=r"v0\.0\.[0-4]$",  # Old versions
     ),
     CrdRepository(
         "mittwald",
         "kubernetes-secret-generator",
         "https://github.com/mittwald/kubernetes-secret-generator.git",
-        "deploy/crds/*.y*ml",
+        ("deploy/crds/*.yaml", "deploy/crds/*.yml"),
         # Before 3.3.3 (until 3.3.2) there was no CRD support so lets only start from v3.4 (to make the regex easier...)
         exclude_tag_regex=r"(v[0-2]\..*?\..*?|v3\.[0-3]\.[0-9]+?)$",
     ),
@@ -358,7 +370,7 @@ repositories: list[CrdRepository] = [
         "zalando",
         "postgres-operator",
         "https://github.com/zalando/postgres-operator.git",
-        "manifests/*.crd.y*ml",
+        ("charts/postgres-operator/crds/*.yaml", "charts/postgres-operator/crds/*.yml"),
         exclude_tag_regex=r"v1\.[0-2]\.0$",  # These initial versions had CRDs only within templates
     ),
     CrdRepository(
@@ -377,11 +389,13 @@ repositories: list[CrdRepository] = [
         get_crd_urls=lambda ref: f"https://github.com/cert-manager/cert-manager/releases/download/{ref.lstrip('ref/tags/')}/cert-manager.crds.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
-    CrdRepository(
+    HelmCrdRepository(
+        "https://kyverno.github.io/kyverno/index.yaml",
         "kyverno",
         "kyverno",
         "https://github.com/kyverno/kyverno.git",
-        "config/crds/**/*.y*ml",
+        ("config/crds/**/*.yaml", "config/crds/**/*.yml"),
+        use_app_version_for_git_tag=True,
         exclude_tag_regex=r"(v0\.|v1\.[0-5]\.)",  # Ignore old versions that did not had config files in the above glob.
     ),
 ]

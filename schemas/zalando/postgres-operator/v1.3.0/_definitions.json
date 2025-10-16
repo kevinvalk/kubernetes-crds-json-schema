@@ -805,12 +805,6 @@
           },
           "additionalProperties": false
         },
-        "status": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
         "metadata": {
           "type": "object"
         }
