@@ -374,6 +374,13 @@ repositories: list[CrdRepository] = [
         exclude_tag_regex=r"v1\.[0-2]\.0$",  # These initial versions had CRDs only within templates
     ),
     CrdRepository(
+        "cilium",
+        "cilium",
+        "https://github.com/cilium/cilium.git",
+        ("pkg/k8s/apis/cilium.io/client/crds/**/*.yaml", "pkg/k8s/apis/cilium.io/client/crds/**/*.yml"),
+        exclude_tag_regex=r"(v0\.|v1\.[0-9]\.)",  # Skip old version with different location CRD
+    ),
+    CrdRepository(
         "longhorn",
         "longhorn",
         "https://github.com/longhorn/longhorn.git",
