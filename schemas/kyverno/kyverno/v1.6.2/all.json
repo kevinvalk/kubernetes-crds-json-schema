@@ -1,0 +1,37 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1.ClusterPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1alpha1.ClusterReportChangeRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1alpha2.ClusterReportChangeRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1.GenerateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1.Policy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1alpha1.ReportChangeRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1alpha2.ReportChangeRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/wgpolicyk8s.io.v1alpha1.ClusterPolicyReport"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/wgpolicyk8s.io.v1alpha2.ClusterPolicyReport"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/wgpolicyk8s.io.v1alpha1.PolicyReport"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/wgpolicyk8s.io.v1alpha2.PolicyReport"
+    }
+  ]
+}

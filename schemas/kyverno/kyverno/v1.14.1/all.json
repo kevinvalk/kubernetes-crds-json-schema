@@ -1,0 +1,64 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2.CleanupPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2beta1.CleanupPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2.ClusterCleanupPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2beta1.ClusterCleanupPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1.ClusterPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2beta1.ClusterPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2alpha1.GlobalContextEntry"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1.Policy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2beta1.Policy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2.PolicyException"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2beta1.PolicyException"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v1beta1.UpdateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/kyverno.io.v2.UpdateRequest"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/policies.kyverno.io.v1alpha1.ImageValidatingPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/policies.kyverno.io.v1alpha1.PolicyException"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/policies.kyverno.io.v1alpha1.ValidatingPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/wgpolicyk8s.io.v1alpha2.ClusterPolicyReport"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/wgpolicyk8s.io.v1alpha2.PolicyReport"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/reports.kyverno.io.v1.ClusterEphemeralReport"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/reports.kyverno.io.v1.EphemeralReport"
+    }
+  ]
+}

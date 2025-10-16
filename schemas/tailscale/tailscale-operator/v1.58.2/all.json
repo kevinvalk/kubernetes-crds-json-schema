@@ -1,0 +1,7 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/tailscale.com.v1alpha1.Connector"
+    }
+  ]
+}
