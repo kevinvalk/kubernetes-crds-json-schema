@@ -102,7 +102,3 @@ If you want to also ensure your CRDs are in sync with your actual deployed versi
   ]
 }
 ```
-
-## TODO
-
-- To support Flux2 we need to have a way to unpack the get_crd_urls as in Flux2 they are released as `crd-schemas.tar.gz`
