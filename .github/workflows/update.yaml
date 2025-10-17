@@ -20,7 +20,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Run build.py
-        run: uv run build.py
+        run: uv run generate.py
 
       - uses: stefanzweifel/git-auto-commit-action@v7
         with:
