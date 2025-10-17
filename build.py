@@ -234,7 +234,7 @@ class CrdRepository:
         remote = self.git.remotes.create_anonymous(self.git_url)
 
         return {
-            remote.name.lstrip("refs/tags/"): remote.name
+            f"v{remote.name.lstrip('refs/tags/').lstrip('v')}": remote.name
             for remote in remote.list_heads()
             if remote.name is not None
             and remote.name.startswith("refs/tags/")
@@ -274,7 +274,7 @@ class CrdRepository:
 
     async def generate_json_schema_from_urls(self, ref: str, buffer_size=io.DEFAULT_BUFFER_SIZE, **kwargs) -> None:
         assert self.get_crd_urls is not None
-        async with httpx.AsyncClient(follow_redirects=True, transport=RetryTransport()) as client:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=60, transport=RetryTransport()) as client:
             urls = self.get_crd_urls(ref)
             if isinstance(urls, str):
                 urls = [urls]
@@ -309,21 +309,24 @@ class CrdRepository:
 
 
 class HelmCrdRepository(CrdRepository):
-    def __init__(self, repository_url: str, *args, use_app_version_for_git_tag=False, **kwargs) -> None:
+    def __init__(
+        self, repository_url: str, *args, is_git_tag_start_with_v=True, use_app_version_for_git_tag=False, **kwargs
+    ) -> None:
         self.repository_url = repository_url
+        self.is_git_tag_start_with_v = is_git_tag_start_with_v
         self.use_app_version_for_git_tag = use_app_version_for_git_tag
         super().__init__(*args, **kwargs)
 
     async def get_refs(self):
         remotes = await super().get_refs()
 
-        async with httpx.AsyncClient(follow_redirects=True, transport=RetryTransport()) as client:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=60, transport=RetryTransport()) as client:
             r = await client.get(self.repository_url)
             r.raise_for_status()
             index = yaml.safe_load(r.text)
 
             helm_versions = {
-                f"v{entry['appVersion' if self.use_app_version_for_git_tag else 'version'].lstrip('v')}": entry
+                f"{'v' if self.is_git_tag_start_with_v else ''}{entry['appVersion' if self.use_app_version_for_git_tag else 'version'].lstrip('v')}": entry
                 for entry in cast(list[dict[Any, Any]], index.get("entries", []).get(self.name, []))
                 if "version" in entry
             }
@@ -388,7 +391,8 @@ repositories: list[CrdRepository] = [
         get_crd_urls=lambda ref: f"https://github.com/longhorn/longhorn/releases/download/{ref.lstrip('ref/tags/')}/longhorn.yaml",
         exclude_tag_regex=r"v0\.[0-9]{1,}\.[0-9]{1,}$",
     ),
-    CrdRepository(
+    HelmCrdRepository(
+        "https://charts.jetstack.io/index.yaml",
         "cert-manager",
         "cert-manager",
         "https://github.com/cert-manager/cert-manager.git",

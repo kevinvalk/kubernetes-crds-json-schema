@@ -3,19 +3,19 @@ name = "crds-json-schema"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = "~=3.13.0"
 dependencies = [
-    "httpx>=0.28.1",
-    "httpx-retries>=0.4.3",
-    "pyaml>=25.1.0",
-    "pygit2>=1.18.2",
+    "httpx==0.28.1",
+    "httpx-retries==0.4.3",
+    "pyaml==25.7.0",
+    "pygit2==1.18.2",
 ]
 
 [dependency-groups]
 dev = [
-    "poethepoet>=0.32.2",
-    "pytest>=8.3.4",
-    "ruff>=0.11.0",
+    "poethepoet==0.37.0",
+    "pytest==8.4.2",
+    "ruff==0.14.1",
 ]
 
 [tool.ruff]

@@ -23,10 +23,10 @@ Create your collection file as **json-schema-kubernetes-with-crds.json**
       "$ref": "https://raw.githubusercontent.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/longhorn/longhorn/v1.10.0/all.json?registryUrl=https://charts.longhorn.io/&datasource=helm"
     },
     {
-      "$ref": "https://raw.githubusercontent.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/cert-manager/cert-manager/v1.19.1/all.json?registryUrl=https://charts.jetstack.io/&datasource=helm"
+      "$ref": "https://raw.githubusercontent.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/cert-manager/cert-manager/v1.18.3/all.json?registryUrl=https://charts.jetstack.io/&datasource=helm"
     },
     {
-      "$ref": "https://raw.githubusercontent.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/tailscale/tailscale-operator/v1.88.4/all.json?registryUrl=https://pkgs.tailscale.com/helmcharts/&datasource=helm"
+      "$ref": "https://raw.githubusercontent.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/tailscale/tailscale-operator/v1.86.2/all.json?registryUrl=https://pkgs.tailscale.com/helmcharts/&datasource=helm"
     },
     {
       "$ref": "https://raw.githubusercontent.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/kyverno/kyverno/v3.4.4/all.json?registryUrl=https://kyverno.github.io/kyverno/&datasource=helm"
@@ -93,10 +93,11 @@ If you want to also ensure your CRDs are in sync with your actual deployed versi
       "customType": "regex",
       "managerFilePatterns": ["/(?:^|/)json-schema-kubernetes-with-crds\\.json$/"],
       "matchStrings": [
-        "https://raw\\.githubusercontent\\.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/(?<owner>[^/]+)/(?<depName>[^/]+)/(?<currentValue>v?[^/]+)/[^?\"]*\\??(?:(?:datasource=(?<datasource>[^&\"]+)|registryUrl=(?<registryUrl>[^&\"]+)|[^=&\"]+=[^&\"]+)&?)*"
+        "https://raw\\.githubusercontent\\.com/kevinvalk/kubernetes-crds-json-schema/refs/heads/main/schemas/(?<owner>[^/]+)/(?<depName>[^/]+)/v(?<currentValue>[^/]+)/[^?\"]*\\??(?:(?:datasource=(?<datasource>[^&\"]+)|registryUrl=(?<registryUrl>[^&\"]+)|[^=&\"]+=[^&\"]+)&?)*"
       ],
       "packageNameTemplate": "{{# unless registryUrl }}{{{ owner }}}/{{/ unless }}{{{ depName }}}",
-      "datasourceTemplate": "{{# if datasource }}{{{ datasource }}}{{ else }}github-releases{{/ if }}"
+      "datasourceTemplate": "{{# if datasource }}{{{ datasource }}}{{ else }}github-releases{{/ if }}",
+      "extractVersionTemplate": "^v?(?<version>.*)$" // kubernetes-crds-json-schema normalizes versions to v<version> so we have to normalize as well!
     }
   ]
 }
