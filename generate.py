@@ -1,8 +1,8 @@
-from pathlib import Path
 import asyncio
-from crd_json_schema.repository import HelmCrdRepository, CrdRepository
-from crd_json_schema.main import generate
+from pathlib import Path
 
+from crd_json_schema.main import generate
+from crd_json_schema.repository import CrdRepository, HelmCrdRepository
 
 if __name__ == "__main__":
     asyncio.run(
@@ -52,6 +52,13 @@ if __name__ == "__main__":
                 "https://github.com/cilium/cilium.git",
                 ("pkg/k8s/apis/cilium.io/client/crds/**/*.yaml", "pkg/k8s/apis/cilium.io/client/crds/**/*.yml"),
                 exclude_tag_regex=r"(v0\.|v1\.[0-9]\.)",  # Skip old version with different location CRD
+            ),
+            CrdRepository(
+                "rajsinghtech",
+                "garage-operator",
+                "https://github.com/rajsinghtech/garage-operator.git",
+                ("charts/garage-operator/crd-bases/**/*.yaml", "charts/garage-operator/crd-bases/**/*.yml"),
+                exclude_tag_regex=r"(v0\.[0-5]\.)",  # Skip old version with different location CRD
             ),
             CrdRepository(
                 "longhorn",

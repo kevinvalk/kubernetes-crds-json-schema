@@ -1,12 +1,11 @@
-from typing import Any, Generator
-import logging
-import yaml
-
 import io
-from pathlib import Path
 import json
+import logging
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Generator
 
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +105,6 @@ def generate(
                 continue
             if y["kind"] != "CustomResourceDefinition":
                 continue
-
             if "spec" in y and "validation" in y["spec"] and "openAPIV3Schema" in y["spec"]["validation"]:
                 schemas.append(
                     Schema(
@@ -120,6 +118,10 @@ def generate(
             elif "spec" in y and "versions" in y["spec"]:
                 for version in y["spec"]["versions"]:
                     if "schema" in version and "openAPIV3Schema" in version["schema"]:
+                        # NOTE: Skip empty schema's https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/
+                        if version["schema"]["openAPIV3Schema"].get("x-kubernetes-preserve-unknown-fields", False):
+                            continue
+
                         schemas.append(
                             Schema(
                                 kind=y["spec"]["names"]["kind"],
@@ -155,6 +157,9 @@ def generate(
 
         # NOTE: No deep copy is needed as we already wrote the schema files, so let's modify the original structures.
         for schema in schemas:
+            if "properties" not in schema.definition:
+                raise NotImplementedError(f"We do not have properties {schema.definition=}")
+
             append_no_duplicates(
                 schema.definition["properties"]["apiVersion"], "enum", f"{schema.group}/{schema.version}"
             )

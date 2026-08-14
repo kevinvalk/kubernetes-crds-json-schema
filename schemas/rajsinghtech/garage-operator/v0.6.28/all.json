@@ -1,0 +1,28 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1beta1.GarageAdminToken"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1alpha1.GarageBucket"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1beta1.GarageBucket"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1beta1.GarageCluster"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1beta2.GarageCluster"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1beta1.GarageKey"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1beta1.GarageNode"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/garage.rajsingh.info.v1beta1.GarageReferenceGrant"
+    }
+  ]
+}
