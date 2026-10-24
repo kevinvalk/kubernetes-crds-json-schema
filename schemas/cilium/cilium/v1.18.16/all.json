@@ -1,0 +1,94 @@
+{
+  "oneOf": [
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumBGPAdvertisement"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumBGPAdvertisement"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumBGPClusterConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumBGPClusterConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumBGPNodeConfigOverride"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumBGPNodeConfigOverride"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumBGPNodeConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumBGPNodeConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumBGPPeerConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumBGPPeerConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumCIDRGroup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumCIDRGroup"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumClusterwideEnvoyConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumClusterwideNetworkPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumEgressGatewayPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumEndpoint"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumEnvoyConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumIdentity"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumLoadBalancerIPPool"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumLoadBalancerIPPool"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumLocalRedirectPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumNetworkPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumNodeConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumNodeConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2.CiliumNode"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumBGPPeeringPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumEndpointSlice"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumGatewayClassConfig"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumL2AnnouncementPolicy"
+    },
+    {
+      "$ref": "_definitions.json#/definitions/cilium.io.v2alpha1.CiliumPodIPPool"
+    }
+  ]
+}
